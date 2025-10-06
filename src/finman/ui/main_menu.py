@@ -17,6 +17,8 @@ class MainMenu(Scene):
         pass
 
     def handle_input(self, input):
+        if input == curses.KEY_ENTER or input == 10 or input == 13:
+            exit()
         if input == curses.KEY_DOWN:
             self.selected = (self.selected+1)%len(self.options)
         elif input == curses.KEY_UP:
