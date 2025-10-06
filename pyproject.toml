@@ -14,7 +14,7 @@ dependencies = [
 packages = [{include = "finman", from = "src"}]
 
 [project.scripts]
-finman = "finman.ui.main_menu:main"
+finman = "finman.main:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
