@@ -1,16 +1,17 @@
 import curses # imports curses a barebones highly portable tui library
 from finman.util.menus import build_menu
 from finman.ui.scene import Scene
+from finman.ui.transactions import Transactions
+
 
 class MainMenu(Scene):
-    def __init__(self,screen):
-        super().__init__(screen)
+    def __init__(self,screen,pred_screen):
+        super().__init__(screen,None)
         self.entered = False
         self.selected = 0
         self.options = ["Overview", "Transations", "Budget"]
         self.menu_window = curses.newwin(1, 1, 3, 0)
         self.title_window = curses.newwin(1, 1, 0, 0)
-        self.screen = screen
         self.name = "Finman"
         self.tagline = "The Financial Management App"
         self.fullname = self.name + ": " + self.tagline
@@ -18,13 +19,20 @@ class MainMenu(Scene):
 
     def handle_input(self, input):
         if input == curses.KEY_ENTER or input == 10 or input == 13:
+            if self.selected == 1:
+                self.change_scene = Transactions(self.screen,self)
+        if input == 27:
             exit()
         if input == curses.KEY_DOWN:
             self.selected = (self.selected+1)%len(self.options)
         elif input == curses.KEY_UP:
             self.selected = (self.selected-1)%len(self.options)
 
-    def update(self,scene):
+    def update(self):
+        if self.change_scene:
+            scene = self.change_scene
+            return scene
+
         num_rows, num_cols = self.screen.getmaxyx() 
         # resize the title_window to take up 3 rows two for the border and one for the title itself
         self.title_window.resize(3,num_cols)
@@ -41,7 +49,7 @@ class MainMenu(Scene):
         self.menu_window.resize(num_rows-3,num_cols)
         # convience function to make menu
         build_menu(self.menu_window,self.options,self.selected,row_cen=1,col_cen=1)
-        pass
+        return None
 
     def render(self):
         self.menu_window.refresh()
@@ -54,5 +62,6 @@ class MainMenu(Scene):
         pass
 
     def on_exit(self):
+        super().on_exit()
         pass
 

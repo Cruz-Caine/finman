@@ -7,15 +7,16 @@ def main():
     curses_init(screen)
     
     input = None
-    main_menu = MainMenu(screen)
+    main_menu = MainMenu(screen,None)
     current_scene = main_menu
     while True:
 
-        scene = None
-        current_scene.full_pass(input,scene)
+        scene = current_scene.full_pass(input)
 
         if scene != None:
+            current_scene.on_exit()
             current_scene = scene
+            current_scene.on_enter()
         # limit the speed of the app
         curses.napms(100)
         # check for key presses
