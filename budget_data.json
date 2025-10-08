@@ -1,0 +1,414 @@
+{
+  "budgets": [
+    {
+      "year": 2025,
+      "month": 1,
+      "tags": [
+        {
+          "id": "utilities",
+          "name": "Utilities",
+          "maxAmount": 500.0,
+          "subTags": [
+            {
+              "id": "light",
+              "name": "Light",
+              "maxAmount": 150.0
+            },
+            {
+              "id": "water",
+              "name": "Water",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "gas",
+              "name": "Gas",
+              "maxAmount": 80.0
+            },
+            {
+              "id": "internet",
+              "name": "Internet",
+              "maxAmount": 70.0
+            }
+          ]
+        },
+        {
+          "id": "food",
+          "name": "Food",
+          "maxAmount": 600.0,
+          "subTags": [
+            {
+              "id": "groceries",
+              "name": "Groceries",
+              "maxAmount": 400.0
+            },
+            {
+              "id": "dining",
+              "name": "Dining Out",
+              "maxAmount": 200.0
+            }
+          ]
+        },
+        {
+          "id": "transportation",
+          "name": "Transportation",
+          "maxAmount": 350.0,
+          "subTags": [
+            {
+              "id": "fuel",
+              "name": "Fuel",
+              "maxAmount": 200.0
+            },
+            {
+              "id": "maintenance",
+              "name": "Maintenance",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "parking",
+              "name": "Parking",
+              "maxAmount": 50.0
+            }
+          ]
+        },
+        {
+          "id": "entertainment",
+          "name": "Entertainment",
+          "maxAmount": 250.0,
+          "subTags": [
+            {
+              "id": "streaming",
+              "name": "Streaming Services",
+              "maxAmount": 50.0
+            },
+            {
+              "id": "movies",
+              "name": "Movies",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "hobbies",
+              "name": "Hobbies",
+              "maxAmount": 100.0
+            }
+          ]
+        },
+        {
+          "id": "healthcare",
+          "name": "Healthcare",
+          "maxAmount": 200.0,
+          "subTags": []
+        },
+        {
+          "id": "shopping",
+          "name": "Shopping",
+          "maxAmount": 300.0,
+          "subTags": [
+            {
+              "id": "clothing",
+              "name": "Clothing",
+              "maxAmount": 150.0
+            },
+            {
+              "id": "electronics",
+              "name": "Electronics",
+              "maxAmount": 150.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "month": 2,
+      "tags": [
+        {
+          "id": "utilities",
+          "name": "Utilities",
+          "maxAmount": 480.0,
+          "subTags": [
+            {
+              "id": "light",
+              "name": "Light",
+              "maxAmount": 140.0
+            },
+            {
+              "id": "water",
+              "name": "Water",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "gas",
+              "name": "Gas",
+              "maxAmount": 170.0
+            },
+            {
+              "id": "internet",
+              "name": "Internet",
+              "maxAmount": 70.0
+            }
+          ]
+        },
+        {
+          "id": "food",
+          "name": "Food",
+          "maxAmount": 550.0,
+          "subTags": [
+            {
+              "id": "groceries",
+              "name": "Groceries",
+              "maxAmount": 400.0
+            },
+            {
+              "id": "dining",
+              "name": "Dining Out",
+              "maxAmount": 150.0
+            }
+          ]
+        },
+        {
+          "id": "transportation",
+          "name": "Transportation",
+          "maxAmount": 350.0,
+          "subTags": [
+            {
+              "id": "fuel",
+              "name": "Fuel",
+              "maxAmount": 200.0
+            },
+            {
+              "id": "maintenance",
+              "name": "Maintenance",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "parking",
+              "name": "Parking",
+              "maxAmount": 50.0
+            }
+          ]
+        },
+        {
+          "id": "entertainment",
+          "name": "Entertainment",
+          "maxAmount": 200.0,
+          "subTags": [
+            {
+              "id": "streaming",
+              "name": "Streaming Services",
+              "maxAmount": 50.0
+            },
+            {
+              "id": "movies",
+              "name": "Movies",
+              "maxAmount": 80.0
+            },
+            {
+              "id": "hobbies",
+              "name": "Hobbies",
+              "maxAmount": 70.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "month": 3,
+      "tags": [
+        {
+          "id": "utilities",
+          "name": "Utilities",
+          "maxAmount": 500.0,
+          "subTags": [
+            {
+              "id": "light",
+              "name": "Light",
+              "maxAmount": 150.0
+            },
+            {
+              "id": "water",
+              "name": "Water",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "gas",
+              "name": "Gas",
+              "maxAmount": 80.0
+            },
+            {
+              "id": "internet",
+              "name": "Internet",
+              "maxAmount": 70.0
+            }
+          ]
+        },
+        {
+          "id": "food",
+          "name": "Food",
+          "maxAmount": 600.0,
+          "subTags": [
+            {
+              "id": "groceries",
+              "name": "Groceries",
+              "maxAmount": 400.0
+            },
+            {
+              "id": "dining",
+              "name": "Dining Out",
+              "maxAmount": 200.0
+            }
+          ]
+        },
+        {
+          "id": "transportation",
+          "name": "Transportation",
+          "maxAmount": 350.0,
+          "subTags": [
+            {
+              "id": "fuel",
+              "name": "Fuel",
+              "maxAmount": 200.0
+            },
+            {
+              "id": "maintenance",
+              "name": "Maintenance",
+              "maxAmount": 100.0
+            },
+            {
+              "id": "parking",
+              "name": "Parking",
+              "maxAmount": 50.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "month": 10,
+      "tags": []
+    }
+  ],
+  "transactions": [
+    {
+      "id": "txn_001",
+      "year": 2025,
+      "month": 1,
+      "day": 5,
+      "amount": 125.5,
+      "description": "Electric bill payment",
+      "tagId": "utilities",
+      "subtagId": "light"
+    },
+    {
+      "id": "txn_002",
+      "year": 2025,
+      "month": 1,
+      "day": 8,
+      "amount": 85.2,
+      "description": "Grocery shopping at Walmart",
+      "tagId": "food",
+      "subtagId": "groceries"
+    },
+    {
+      "id": "txn_003",
+      "year": 2025,
+      "month": 1,
+      "day": 12,
+      "amount": 45.0,
+      "description": "Gas station fill-up",
+      "tagId": "transportation",
+      "subtagId": "fuel"
+    },
+    {
+      "id": "txn_004",
+      "year": 2025,
+      "month": 1,
+      "day": 15,
+      "amount": 65.0,
+      "description": "Internet bill",
+      "tagId": "utilities",
+      "subtagId": "internet"
+    },
+    {
+      "id": "txn_005",
+      "year": 2025,
+      "month": 1,
+      "day": 18,
+      "amount": 120.0,
+      "description": "Dinner at restaurant",
+      "tagId": "food",
+      "subtagId": "dining"
+    },
+    {
+      "id": "txn_006",
+      "year": 2025,
+      "month": 1,
+      "day": 22,
+      "amount": 15.99,
+      "description": "Netflix subscription",
+      "tagId": "entertainment",
+      "subtagId": "streaming"
+    },
+    {
+      "id": "txn_007",
+      "year": 2025,
+      "month": 1,
+      "day": 25,
+      "amount": 95.75,
+      "description": "Water bill",
+      "tagId": "utilities",
+      "subtagId": "water"
+    },
+    {
+      "id": "txn_008",
+      "year": 2025,
+      "month": 2,
+      "day": 3,
+      "amount": 135.0,
+      "description": "Electric bill payment",
+      "tagId": "utilities",
+      "subtagId": "light"
+    },
+    {
+      "id": "txn_009",
+      "year": 2025,
+      "month": 2,
+      "day": 7,
+      "amount": 110.5,
+      "description": "Grocery shopping",
+      "tagId": "food",
+      "subtagId": "groceries"
+    },
+    {
+      "id": "txn_010",
+      "year": 2025,
+      "month": 2,
+      "day": 14,
+      "amount": 50.0,
+      "description": "Gas station fill-up",
+      "tagId": "transportation",
+      "subtagId": "fuel"
+    },
+    {
+      "id": "txn_011",
+      "year": 2025,
+      "month": 2,
+      "day": 20,
+      "amount": 85.0,
+      "description": "Movie tickets and popcorn",
+      "tagId": "entertainment",
+      "subtagId": "movies"
+    },
+    {
+      "id": "txn_012",
+      "year": 2025,
+      "month": 3,
+      "day": 1,
+      "amount": 150.0,
+      "description": "Doctor checkup",
+      "tagId": "healthcare",
+      "subtagId": null
+    }
+  ]
+}
