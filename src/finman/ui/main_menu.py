@@ -2,6 +2,7 @@ import curses # imports curses a barebones highly portable tui library
 from finman.util.menus import build_menu
 from finman.ui.scene import Scene
 from finman.ui.transactions import Transactions
+from finman.ui.budget import Budget
 
 
 class MainMenu(Scene):
@@ -21,6 +22,8 @@ class MainMenu(Scene):
         if input == curses.KEY_ENTER or input == 10 or input == 13:
             if self.selected == 1:
                 self.change_scene = Transactions(self.screen,self)
+            elif self.selected == 2:
+                self.change_scene = Budget(self.screen,self)
         if input == 27:
             exit()
         if input == curses.KEY_DOWN:

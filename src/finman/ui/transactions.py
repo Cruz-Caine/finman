@@ -16,8 +16,10 @@ class Transactions(Scene):
         self.search_active = True
         self.sort_window = curses.newwin(1, 1, 3, 0)
         self.sort_selected = 0
-        self.transactions_window = curses.newwin(1, 1, 3, 21)
+        self.transactions_pad = curses.newpad(10000, 500)
+        self.transactions_border = curses.newwin(1, 1, 3, 21)
         self.transactions_selected = 0
+        self.scroll_offset = 0
         self.left_options = ["Date-Ascending","Date-Descending","Quan-Ascending","Quan-Descending"]
         self.findata = FinancialData()
         self.sorted_transactions = []
@@ -161,19 +163,35 @@ class Transactions(Scene):
         self.sort_window.clear()
         self.sort_window.box()
 
-        # Transactions window below search bar: right side, remaining width
-        self.transactions_window.resize(num_rows - 3, num_cols - 20)
-        self.transactions_window.mvwin(3, 20)
-        self.transactions_window.clear()
-        self.transactions_window.box()
+        # Transactions border window below search bar: right side, remaining width
+        self.transactions_border.resize(num_rows - 3, num_cols - 20)
+        self.transactions_border.mvwin(3, 20)
+        self.transactions_border.clear()
+        self.transactions_border.box()
 
         curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
         build_menu(self.sort_window, self.left_options, self.sort_selected, row_off=1, col_off=1)
 
-        # Display transactions
+        # Display transactions using pad
         if formatted_transactions:
-            build_menu(self.transactions_window, formatted_transactions, self.transactions_selected, row_off=1, col_off=1)
+            # Clear pad and draw all transactions
+            self.transactions_pad.clear()
+            build_menu(self.transactions_pad, formatted_transactions, self.transactions_selected, row_off=0, col_off=0)
+
+            # Calculate viewport dimensions (inside border)
+            viewport_height = num_rows - 3 - 2  # Screen height - top bar - borders
+            viewport_width = num_cols - 20 - 2   # Screen width - left panel - borders
+
+            # Adjust scroll offset to keep selected item visible
+            if self.transactions_selected < self.scroll_offset:
+                self.scroll_offset = self.transactions_selected
+            elif self.transactions_selected >= self.scroll_offset + viewport_height:
+                self.scroll_offset = self.transactions_selected - viewport_height + 1
+
+            # Ensure scroll offset is within bounds
+            max_scroll = max(0, len(formatted_transactions) - viewport_height)
+            self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
 
         pass
         return None
@@ -181,7 +199,25 @@ class Transactions(Scene):
     def render(self):
         self.search_window.refresh()
         self.sort_window.refresh()
-        self.transactions_window.refresh()
+        self.transactions_border.refresh()
+
+        # Refresh pad to show visible portion
+        num_rows, num_cols = self.screen.getmaxyx()
+        if self.sorted_transactions:
+            # Calculate viewport coordinates (inside border)
+            pad_top = self.scroll_offset
+            pad_left = 0
+            screen_top = 3 + 1  # Below search bar + border
+            screen_left = 20 + 1  # After sort window + border
+            screen_bottom = num_rows - 1 - 1  # Bottom of screen - border
+            screen_right = num_cols - 1 - 1  # Right of screen - border
+
+            self.transactions_pad.refresh(
+                pad_top, pad_left,
+                screen_top, screen_left,
+                screen_bottom, screen_right
+            )
+
         self.screen.refresh()
         self.screen.clear()
         pass
