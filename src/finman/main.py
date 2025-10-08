@@ -5,6 +5,18 @@ import argparse
 def main():
     screen = curses.initscr() # creates the screen object we will be working with
     curses_init(screen)
+    #args = parser.parse_args()
+    #parser.add_argument('filename', help='Input file to process')
+    #args = parser.parse_args()
+    #try:
+    #    with open(args.filename, 'r') as f:
+    #        data = json.load(f)
+    #    
+    #    # Do something with the data
+    #    if args.pretty:
+    #        print(json.dumps(data, indent=2))
+    #    else:
+    #        print(data)
     
     input = None
     main_menu = MainMenu(screen,None)

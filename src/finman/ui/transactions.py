@@ -1,44 +1,166 @@
-import curses # imports curses a barebones highly portable tui library
+import curses # imports curses, a barebones highly portable tui library
+from curses import textpad
 from finman.util.menus import build_menu
 from finman.ui.scene import Scene
 from finman.util.menus import build_menu
+from finman.util.dialog import Dialog
 from finman.ui.scene import Scene
+from finman.logic.financial_data import FinancialData
+
 
 
 class Transactions(Scene):
     def __init__(self,screen,pred_scene):
         super().__init__(screen,pred_scene)
-        self.sort_window = curses.newwin(1, 1, 0, 0)
+        self.search_window = curses.newwin(3, 1, 0, 0)
+        self.search_text = ""
+        self.search_active = True
+        self.sort_window = curses.newwin(1, 1, 3, 0)
         self.sort_selected = 0
+        self.transactions_window = curses.newwin(1, 1, 3, 21)
+        self.transactions_selected = 0
         self.left_options = ["Date-Ascending","Date-Descending","Quan-Ascending","Quan-Descending"]
+        self.findata = FinancialData()
+        self.sorted_transactions = []
         pass
 
+    def _get_sorted_transactions(self):
+        """Get transactions sorted based on current sort selection."""
+        transactions = self.findata.get_all_transactions()
+
+        if self.sort_selected == 0:  # Date-Ascending
+            return sorted(transactions, key=lambda t: (t['year'], t['month'], t['day']))
+        elif self.sort_selected == 1:  # Date-Descending
+            return sorted(transactions, key=lambda t: (t['year'], t['month'], t['day']), reverse=True)
+        elif self.sort_selected == 2:  # Quan-Ascending
+            return sorted(transactions, key=lambda t: t['amount'])
+        elif self.sort_selected == 3:  # Quan-Descending
+            return sorted(transactions, key=lambda t: t['amount'], reverse=True)
+
+        return transactions
+
+    def _format_transaction(self, transaction):
+        """Format a transaction for display."""
+        date = f"{transaction['year']}-{transaction['month']:02d}-{transaction['day']:02d}"
+        amount = f"${transaction['amount']:.2f}"
+        description = transaction['description']
+        return f"{date} | {amount:>10} | {description}"
+
+    def _filter_by_search(self, transactions):
+        """Filter transactions based on search text."""
+        if not self.search_text:
+            return transactions
+
+        search_lower = self.search_text.lower()
+        filtered = []
+
+        for transaction in transactions:
+            # Check if search text appears in description
+            if search_lower in transaction['description'].lower():
+                filtered.append(transaction)
+                continue
+
+            # Check if search text appears in date
+            date = f"{transaction['year']}-{transaction['month']:02d}-{transaction['day']:02d}"
+            if search_lower in date:
+                filtered.append(transaction)
+                continue
+
+            # Check if search text appears in amount
+            amount = f"{transaction['amount']:.2f}"
+            if search_lower in amount:
+                filtered.append(transaction)
+                continue
+
+        return filtered
+
     def handle_input(self,input):
-        if input == curses.KEY_ENTER or input == 10 or input == 13:
+        # Tab: cycle forward through sort options
+        if input == 9:  # Tab
+            self.sort_selected = (self.sort_selected + 1) % len(self.left_options)
+        # Shift+Tab: cycle backward through sort options
+        elif input == 353:  # Shift+Tab (curses.KEY_BTAB)
+            self.sort_selected = (self.sort_selected - 1) % len(self.left_options)
+        # Enter key
+        elif input == curses.KEY_ENTER or input == 10 or input == 13:
             pass
-        if input ==  27:
+        # Escape key
+        elif input == 27:
             self.change_scene = self.pred_scene
-            pass
+        # Backspace: remove last character from search
+        elif input in (curses.KEY_BACKSPACE, 127, 8):
+            if self.search_text:
+                self.search_text = self.search_text[:-1]
+        # Navigation controls for transactions
+        elif input == curses.KEY_UP:
+            self.transactions_selected = max(0, self.transactions_selected - 1)
+        elif input == curses.KEY_DOWN:
+            # Bounds checking happens in update()
+            self.transactions_selected += 1
+        # Printable characters: add to search text
+        elif 32 <= input <= 126:  # Printable ASCII characters
+            self.search_text += chr(input)
 
     def update(self):
         if self.change_scene:
             scene = self.change_scene
             return scene
 
-        num_rows, num_cols = self.screen.getmaxyx() 
-        # resize the title_window to take up 3 rows two for the border and one for the title itself
-        self.sort_window.resize(num_rows,20)
-        # add a border to the title_window
+        # Get sorted and filtered transactions
+        sorted_trans = self._get_sorted_transactions()
+        self.sorted_transactions = self._filter_by_search(sorted_trans)
+        formatted_transactions = [self._format_transaction(t) for t in self.sorted_transactions]
+
+        # Keep transactions_selected within bounds
+        if formatted_transactions:
+            self.transactions_selected = max(0, min(self.transactions_selected, len(formatted_transactions) - 1))
+        else:
+            self.transactions_selected = 0
+
+        num_rows, num_cols = self.screen.getmaxyx()
+
+        # Search bar at top: 3 rows, full width
+        self.search_window.resize(3, num_cols)
+        self.search_window.mvwin(0, 0)
+        self.search_window.clear()
+        self.search_window.box()
+
+        # Display search text and sort mode in search bar
+        sort_mode = self.left_options[self.sort_selected]
+        search_display = f"Search: {self.search_text}" if self.search_text else "Search: (type to filter)"
+        status = f"Sort: {sort_mode}"
+
+        self.search_window.addstr(1, 2, search_display[:num_cols - 4])
+        if len(status) < num_cols - 4:
+            self.search_window.addstr(1, num_cols - len(status) - 2, status)
+
+        # Sort window below search bar: left side, 20 columns
+        self.sort_window.resize(num_rows - 3, 20)
+        self.sort_window.mvwin(3, 0)
+        self.sort_window.clear()
         self.sort_window.box()
-        # center the title in the title window
+
+        # Transactions window below search bar: right side, remaining width
+        self.transactions_window.resize(num_rows - 3, num_cols - 20)
+        self.transactions_window.mvwin(3, 20)
+        self.transactions_window.clear()
+        self.transactions_window.box()
+
         curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-        build_menu(self.sort_window,self.left_options,self.sort_selected,row_off=1,col_off=1)
+        build_menu(self.sort_window, self.left_options, self.sort_selected, row_off=1, col_off=1)
+
+        # Display transactions
+        if formatted_transactions:
+            build_menu(self.transactions_window, formatted_transactions, self.transactions_selected, row_off=1, col_off=1)
+
         pass
         return None
 
     def render(self):
+        self.search_window.refresh()
         self.sort_window.refresh()
+        self.transactions_window.refresh()
         self.screen.refresh()
         self.screen.clear()
         pass
