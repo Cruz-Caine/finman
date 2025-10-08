@@ -97,8 +97,23 @@ class BudgetEditor(Scene):
     def handle_input(self, input):
         field_name = self.field_names[self.current_field]
 
+        # Mouse handling
+        if input == curses.KEY_MOUSE:
+            try:
+                _, mx, my, _, bstate = curses.getmouse()
+                # Check if click is in popup window
+                win_y, win_x = self.popup_window.getbegyx()
+                win_h, win_w = self.popup_window.getmaxyx()
+
+                if win_y <= my < win_y + win_h and win_x <= mx < win_x + win_w:
+                    # Calculate which field was clicked (fields start at row 3)
+                    rel_y = my - win_y - 3
+                    if 0 <= rel_y < len(self.field_names):
+                        self.current_field = rel_y
+            except:
+                pass
         # Tab: move to next field
-        if input == 9:  # Tab
+        elif input == 9:  # Tab
             self.current_field = (self.current_field + 1) % len(self.field_names)
 
         # Shift+Tab: move to previous field
@@ -266,9 +281,9 @@ class BudgetEditor(Scene):
         return None
 
     def render(self):
-        self.popup_window.refresh()
-        self.screen.refresh()
         self.screen.clear()
+        self.screen.refresh()
+        self.popup_window.refresh()
 
     def on_enter(self):
         pass

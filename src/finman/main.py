@@ -44,6 +44,7 @@ def curses_init(screen):
     screen.nodelay(True) # make getchr non-blocking
     curses.curs_set(0) # disable the cursor
     curses.start_color() # enable the usage of colors
+    curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION) # enable mouse support
 
 def curses_exit(screen):
     # Undoes all the changes we made to the terminal during initialization

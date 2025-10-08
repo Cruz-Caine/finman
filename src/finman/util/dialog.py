@@ -27,7 +27,25 @@ class Dialog(Scene):
         self.dialog_window = curses.newwin(dialog_height, dialog_width, start_y, start_x)
 
     def handle_input(self, input):
-        if input == curses.KEY_ENTER or input == 10 or input == 13:
+        if input == curses.KEY_MOUSE:
+            try:
+                _, mx, my, _, bstate = curses.getmouse()
+                # Check if click is in dialog window
+                win_y, win_x = self.dialog_window.getbegyx()
+                win_h, win_w = self.dialog_window.getmaxyx()
+
+                if win_y <= my < win_y + win_h and win_x <= mx < win_x + win_w:
+                    # Check if clicked on an option (options start at row 3)
+                    rel_y = my - win_y - 3  # -3 for border and message
+                    if self.options and 0 <= rel_y < len(self.options):
+                        self.selected = rel_y
+                        # On click, select and confirm
+                        if bstate & curses.BUTTON1_CLICKED:
+                            self.result = self.options[self.selected]
+                            self.change_scene = self.pred_scene
+            except:
+                pass
+        elif input == curses.KEY_ENTER or input == 10 or input == 13:
             # Store the selected option and return to previous scene
             if self.options:
                 self.result = self.options[self.selected]
@@ -75,9 +93,9 @@ class Dialog(Scene):
         return None
 
     def render(self):
-        self.dialog_window.refresh()
-        self.screen.refresh()
         self.screen.clear()
+        self.screen.refresh()
+        self.dialog_window.refresh()
 
     def on_enter(self):
         pass

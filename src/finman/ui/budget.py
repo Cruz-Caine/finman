@@ -144,8 +144,66 @@ class Budget(Scene):
         return f"{item_id:<15} | {name:<30} | {amount}"
 
     def handle_input(self, input):
+        # Mouse handling
+        if input == curses.KEY_MOUSE:
+            try:
+                _, mx, my, _, bstate = curses.getmouse()
+
+                # Check click in sort window (left panel)
+                sort_y, sort_x = self.sort_window.getbegyx()
+                sort_h, sort_w = self.sort_window.getmaxyx()
+                if sort_y <= my < sort_y + sort_h and sort_x <= mx < sort_x + sort_w:
+                    # Clicked in sort window - calculate which option
+                    rel_y = my - sort_y - 1  # -1 for border
+                    if 0 <= rel_y < len(self.sort_options):
+                        self.sort_selected = rel_y
+
+                # Check click in budget area (right panel)
+                budget_y, budget_x = self.budget_border.getbegyx()
+                budget_h, budget_w = self.budget_border.getmaxyx()
+                if budget_y <= my < budget_y + budget_h and budget_x <= mx < budget_x + budget_w:
+                    # Clicked in budget area
+                    rel_y = my - budget_y - 1  # -1 for border
+                    # Calculate which item (accounting for scroll offset)
+                    clicked_index = rel_y + self.scroll_offset
+                    if 0 <= clicked_index < len(self.budget_items):
+                        self.budget_selected = clicked_index
+                        # Double-click to edit
+                        if bstate & curses.BUTTON1_DOUBLE_CLICKED:
+                            selected_item = self.budget_items[self.budget_selected]
+                            item_type = selected_item["type"]
+                            self.change_scene = BudgetEditor(
+                                self.screen, self,
+                                mode="edit",
+                                item_type=item_type,
+                                item=selected_item
+                            )
+
+                # Check click in search bar for period navigation
+                search_y, search_x = self.search_window.getbegyx()
+                search_h, search_w = self.search_window.getmaxyx()
+                if search_y <= my < search_y + search_h and search_x <= mx < search_x + search_w:
+                    # Check if clicked on left or right side for period navigation
+                    num_rows, num_cols = self.screen.getmaxyx()
+                    # Right side of search bar has the period info
+                    if mx > search_x + search_w - 30:  # Approximate position of period controls
+                        # Previous period if clicked on left part, next if right
+                        if mx < search_x + search_w - 15:
+                            # Previous period
+                            if self.available_periods:
+                                self.current_period_index = (self.current_period_index - 1) % len(self.available_periods)
+                                self.budget_selected = 0
+                                self.scroll_offset = 0
+                        else:
+                            # Next period
+                            if self.available_periods:
+                                self.current_period_index = (self.current_period_index + 1) % len(self.available_periods)
+                                self.budget_selected = 0
+                                self.scroll_offset = 0
+            except:
+                pass
         # Left arrow: previous period
-        if input == curses.KEY_LEFT:
+        elif input == curses.KEY_LEFT:
             if self.available_periods:
                 self.current_period_index = (self.current_period_index - 1) % len(self.available_periods)
                 self.budget_selected = 0  # Reset selection
@@ -301,6 +359,8 @@ class Budget(Scene):
         return None
 
     def render(self):
+        self.screen.clear()
+        self.screen.refresh()
         self.search_window.refresh()
         self.sort_window.refresh()
         self.budget_border.refresh()
@@ -322,9 +382,6 @@ class Budget(Scene):
                 screen_top, screen_left,
                 screen_bottom, screen_right
             )
-
-        self.screen.refresh()
-        self.screen.clear()
 
     def on_enter(self):
         # Refresh available periods in case new budgets were added

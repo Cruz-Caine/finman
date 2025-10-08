@@ -20,14 +20,38 @@ class MainMenu(Scene):
         pass
 
     def handle_input(self, input):
-        if input == curses.KEY_ENTER or input == 10 or input == 13:
+        if input == curses.KEY_MOUSE:
+            try:
+                _, mx, my, _, bstate = curses.getmouse()
+                # Check if click is in menu window
+                win_y, win_x = self.menu_window.getbegyx()
+                win_h, win_w = self.menu_window.getmaxyx()
+
+                if win_y <= my < win_y + win_h and win_x <= mx < win_x + win_w:
+                    # Calculate which option was clicked based on vertical centering
+                    # Options are evenly spaced vertically
+                    rel_y = my - win_y
+                    spacing = win_h // len(self.options)
+                    clicked_option = rel_y // spacing
+
+                    if 0 <= clicked_option < len(self.options):
+                        self.selected = clicked_option
+                        # On click, trigger selection
+                        if bstate & curses.BUTTON1_CLICKED:
+                            if self.selected == 1:
+                                self.change_scene = Transactions(self.screen,self)
+                            elif self.selected == 2:
+                                self.change_scene = Budget(self.screen,self)
+            except:
+                pass
+        elif input == curses.KEY_ENTER or input == 10 or input == 13:
             if self.selected == 1:
                 self.change_scene = Transactions(self.screen,self)
             elif self.selected == 2:
                 self.change_scene = Budget(self.screen,self)
-        if input == 27:
+        elif input == 27:
             exit()
-        if input == curses.KEY_DOWN:
+        elif input == curses.KEY_DOWN:
             self.selected = (self.selected+1)%len(self.options)
         elif input == curses.KEY_UP:
             self.selected = (self.selected-1)%len(self.options)
@@ -62,11 +86,11 @@ class MainMenu(Scene):
         return None
 
     def render(self):
+        self.screen.clear()
+        self.screen.refresh()
         self.menu_window.refresh()
         self.title_window.refresh()
         self.help_window.refresh()
-        self.screen.refresh()
-        self.screen.clear()
         pass
 
     def on_enter(self):

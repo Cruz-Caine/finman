@@ -108,8 +108,38 @@ class Transactions(Scene):
         return filtered
 
     def handle_input(self,input):
+        # Mouse handling
+        if input == curses.KEY_MOUSE:
+            try:
+                _, mx, my, _, bstate = curses.getmouse()
+
+                # Check click in sort window (left panel)
+                sort_y, sort_x = self.sort_window.getbegyx()
+                sort_h, sort_w = self.sort_window.getmaxyx()
+                if sort_y <= my < sort_y + sort_h and sort_x <= mx < sort_x + sort_w:
+                    # Clicked in sort window - calculate which option
+                    rel_y = my - sort_y - 1  # -1 for border
+                    if 0 <= rel_y < len(self.left_options):
+                        self.sort_selected = rel_y
+
+                # Check click in transactions area (right panel)
+                trans_y, trans_x = self.transactions_border.getbegyx()
+                trans_h, trans_w = self.transactions_border.getmaxyx()
+                if trans_y <= my < trans_y + trans_h and trans_x <= mx < trans_x + trans_w:
+                    # Clicked in transactions area
+                    rel_y = my - trans_y - 1  # -1 for border
+                    # Calculate which transaction (accounting for scroll offset)
+                    clicked_index = rel_y + self.scroll_offset
+                    if 0 <= clicked_index < len(self.sorted_transactions):
+                        self.transactions_selected = clicked_index
+                        # Double-click to edit
+                        if bstate & curses.BUTTON1_DOUBLE_CLICKED:
+                            selected_transaction = self.sorted_transactions[self.transactions_selected]
+                            self.change_scene = TransactionEditor(self.screen, self, mode="edit", transaction=selected_transaction)
+            except:
+                pass
         # Tab: cycle forward through sort options
-        if input == 9:  # Tab
+        elif input == 9:  # Tab
             self.sort_selected = (self.sort_selected + 1) % len(self.left_options)
         # Shift+Tab: cycle backward through sort options
         elif input == 353:  # Shift+Tab (curses.KEY_BTAB)
@@ -234,6 +264,8 @@ class Transactions(Scene):
         return None
 
     def render(self):
+        self.screen.clear()
+        self.screen.refresh()
         self.search_window.refresh()
         self.sort_window.refresh()
         self.transactions_border.refresh()
@@ -256,8 +288,6 @@ class Transactions(Scene):
                 screen_bottom, screen_right
             )
 
-        self.screen.refresh()
-        self.screen.clear()
         pass
 
     def on_enter(self):
