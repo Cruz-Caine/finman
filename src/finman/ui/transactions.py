@@ -2,9 +2,8 @@ import curses # imports curses, a barebones highly portable tui library
 from curses import textpad
 from finman.util.menus import build_menu
 from finman.ui.scene import Scene
-from finman.util.menus import build_menu
 from finman.util.dialog import Dialog
-from finman.ui.scene import Scene
+from finman.ui.transaction_editor import TransactionEditor
 from finman.logic.financial_data import FinancialData
 
 
@@ -22,6 +21,8 @@ class Transactions(Scene):
         self.left_options = ["Date-Ascending","Date-Descending","Quan-Ascending","Quan-Descending"]
         self.findata = FinancialData()
         self.sorted_transactions = []
+        self.pending_delete = None
+        self.last_dialog = None
         pass
 
     def _get_sorted_transactions(self):
@@ -81,9 +82,29 @@ class Transactions(Scene):
         # Shift+Tab: cycle backward through sort options
         elif input == 353:  # Shift+Tab (curses.KEY_BTAB)
             self.sort_selected = (self.sort_selected - 1) % len(self.left_options)
-        # Enter key
+        # 'a' key: Add new transaction
+        elif input == ord('a'):
+            self.change_scene = TransactionEditor(self.screen, self, mode="add")
+        # Enter key: Edit selected transaction
         elif input == curses.KEY_ENTER or input == 10 or input == 13:
-            pass
+            if self.sorted_transactions and self.transactions_selected < len(self.sorted_transactions):
+                selected_transaction = self.sorted_transactions[self.transactions_selected]
+                self.change_scene = TransactionEditor(self.screen, self, mode="edit", transaction=selected_transaction)
+        # Ctrl+D: Delete selected transaction
+        elif input == 4:  # Ctrl+D
+            if self.sorted_transactions and self.transactions_selected < len(self.sorted_transactions):
+                selected_transaction = self.sorted_transactions[self.transactions_selected]
+                # Show confirmation dialog
+                dialog = Dialog(
+                    self.screen, self,
+                    message=f"Delete transaction: {selected_transaction['description']}?",
+                    options=["Yes", "No"],
+                    portion=4
+                )
+                self.last_dialog = dialog
+                self.change_scene = dialog
+                # Store transaction to delete for later
+                self.pending_delete = selected_transaction
         # Escape key
         elif input == 27:
             self.change_scene = self.pred_scene
@@ -166,6 +187,15 @@ class Transactions(Scene):
         pass
 
     def on_enter(self):
+        # Check if we're returning from a delete confirmation dialog
+        if self.pending_delete and self.last_dialog:
+            result = self.last_dialog.get_result()
+            if result == "Yes":
+                # Delete the transaction
+                self.findata.remove_transaction(self.pending_delete["id"])
+            # Clear pending delete and dialog reference
+            self.pending_delete = None
+            self.last_dialog = None
         pass
 
     def on_exit(self):
