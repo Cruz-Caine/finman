@@ -13,6 +13,7 @@ class MainMenu(Scene):
         self.options = ["Overview", "Transations", "Budget"]
         self.menu_window = curses.newwin(1, 1, 3, 0)
         self.title_window = curses.newwin(1, 1, 0, 0)
+        self.help_window = curses.newwin(1, 1, 0, 0)
         self.name = "Finman"
         self.tagline = "The Financial Management App"
         self.fullname = self.name + ": " + self.tagline
@@ -36,7 +37,7 @@ class MainMenu(Scene):
             scene = self.change_scene
             return scene
 
-        num_rows, num_cols = self.screen.getmaxyx() 
+        num_rows, num_cols = self.screen.getmaxyx()
         # resize the title_window to take up 3 rows two for the border and one for the title itself
         self.title_window.resize(3,num_cols)
         # add a border to the title_window
@@ -45,11 +46,17 @@ class MainMenu(Scene):
         curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         self.title_window.addstr(1,(num_cols-len(self.fullname))//2,self.fullname,curses.color_pair(1))
 
+        # Help window at bottom
+        help_text = "↑/↓: Navigate | Enter: Select | Esc: Quit"
+        self.help_window.resize(1, num_cols)
+        self.help_window.mvwin(num_rows - 1, 0)
+        self.help_window.clear()
+        self.help_window.addstr(0, 2, help_text[:num_cols - 4])
 
         # border the menu window
         self.menu_window.box()
-        # resize it if needed
-        self.menu_window.resize(num_rows-3,num_cols)
+        # resize it if needed (leave space for help bar)
+        self.menu_window.resize(num_rows-4, num_cols)
         # convience function to make menu
         build_menu(self.menu_window,self.options,self.selected,row_cen=1,col_cen=1)
         return None
@@ -57,6 +64,7 @@ class MainMenu(Scene):
     def render(self):
         self.menu_window.refresh()
         self.title_window.refresh()
+        self.help_window.refresh()
         self.screen.refresh()
         self.screen.clear()
         pass

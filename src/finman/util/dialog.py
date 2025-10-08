@@ -67,6 +67,11 @@ class Dialog(Scene):
         if self.options:
             build_menu(self.dialog_window, self.options, self.selected, row_off=3, col_off=2)
 
+        # Display help text at bottom
+        help_text = "Tab: Navigate | Enter: Select | Esc: Cancel"
+        if dialog_height > 5:  # Only show if there's room
+            self.dialog_window.addstr(dialog_height - 2, 2, help_text[:dialog_width - 4])
+
         return None
 
     def render(self):

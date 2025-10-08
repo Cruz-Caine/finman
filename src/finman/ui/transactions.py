@@ -20,6 +20,7 @@ class Transactions(Scene):
         self.transactions_border = curses.newwin(1, 1, 3, 21)
         self.transactions_selected = 0
         self.scroll_offset = 0
+        self.help_window = curses.newwin(1, 1, 0, 0)
         self.left_options = ["Date-Ascending","Date-Descending","Quan-Ascending","Quan-Descending"]
         self.findata = FinancialData()
         self.sorted_transactions = []
@@ -47,7 +48,16 @@ class Transactions(Scene):
         date = f"{transaction['year']}-{transaction['month']:02d}-{transaction['day']:02d}"
         amount = f"${transaction['amount']:.2f}"
         description = transaction['description']
-        return f"{date} | {amount:>10} | {description}"
+        tag = transaction.get('tagId', '')
+        subtag = transaction.get('subtagId', '')
+
+        # Format tags
+        if subtag:
+            tags = f"#{tag}/{subtag}"
+        else:
+            tags = f"#{tag}"
+
+        return f"{date} | {amount:>10} | {description} {tags}"
 
     def _filter_by_search(self, transactions):
         """Filter transactions based on search text."""
@@ -57,6 +67,26 @@ class Transactions(Scene):
         search_lower = self.search_text.lower()
         filtered = []
 
+        # Check if searching by tag (#tag or #tag/subtag)
+        if search_lower.startswith('#'):
+            tag_search = search_lower[1:]  # Remove the #
+
+            for transaction in transactions:
+                tag = transaction.get('tagId', '').lower()
+                subtag = transaction.get('subtagId', '').lower() if transaction.get('subtagId') else ''
+
+                # Check if matches tag or tag/subtag format
+                if '/' in tag_search:
+                    # Searching for specific tag/subtag
+                    if tag_search == f"{tag}/{subtag}":
+                        filtered.append(transaction)
+                else:
+                    # Searching for just tag
+                    if tag_search in tag or tag_search in subtag:
+                        filtered.append(transaction)
+            return filtered
+
+        # Regular search (non-tag)
         for transaction in transactions:
             # Check if search text appears in description
             if search_lower in transaction['description'].lower():
@@ -157,14 +187,21 @@ class Transactions(Scene):
         if len(status) < num_cols - 4:
             self.search_window.addstr(1, num_cols - len(status) - 2, status)
 
-        # Sort window below search bar: left side, 20 columns
-        self.sort_window.resize(num_rows - 3, 20)
+        # Help window at bottom
+        help_text = "a: Add | Enter: Edit | Ctrl+D: Delete | Tab: Sort | Type: Search | #tag: Filter | Esc: Back"
+        self.help_window.resize(1, num_cols)
+        self.help_window.mvwin(num_rows - 1, 0)
+        self.help_window.clear()
+        self.help_window.addstr(0, 2, help_text[:num_cols - 4])
+
+        # Sort window below search bar: left side, 20 columns (leave space for help bar)
+        self.sort_window.resize(num_rows - 4, 20)
         self.sort_window.mvwin(3, 0)
         self.sort_window.clear()
         self.sort_window.box()
 
-        # Transactions border window below search bar: right side, remaining width
-        self.transactions_border.resize(num_rows - 3, num_cols - 20)
+        # Transactions border window below search bar: right side, remaining width (leave space for help bar)
+        self.transactions_border.resize(num_rows - 4, num_cols - 20)
         self.transactions_border.mvwin(3, 20)
         self.transactions_border.clear()
         self.transactions_border.box()
@@ -180,7 +217,7 @@ class Transactions(Scene):
             build_menu(self.transactions_pad, formatted_transactions, self.transactions_selected, row_off=0, col_off=0)
 
             # Calculate viewport dimensions (inside border)
-            viewport_height = num_rows - 3 - 2  # Screen height - top bar - borders
+            viewport_height = num_rows - 4 - 2  # Screen height - top bar - help bar - borders
             viewport_width = num_cols - 20 - 2   # Screen width - left panel - borders
 
             # Adjust scroll offset to keep selected item visible
@@ -200,6 +237,7 @@ class Transactions(Scene):
         self.search_window.refresh()
         self.sort_window.refresh()
         self.transactions_border.refresh()
+        self.help_window.refresh()
 
         # Refresh pad to show visible portion
         num_rows, num_cols = self.screen.getmaxyx()
@@ -209,7 +247,7 @@ class Transactions(Scene):
             pad_left = 0
             screen_top = 3 + 1  # Below search bar + border
             screen_left = 20 + 1  # After sort window + border
-            screen_bottom = num_rows - 1 - 1  # Bottom of screen - border
+            screen_bottom = num_rows - 1 - 1 - 1  # Bottom of screen - help bar - border
             screen_right = num_cols - 1 - 1  # Right of screen - border
 
             self.transactions_pad.refresh(
