@@ -1,5 +1,6 @@
 import curses
 from finman.ui.scene import Scene
+from finman.util.dialog import Dialog
 from finman.logic.financial_data import FinancialData
 from datetime import datetime
 
@@ -207,11 +208,36 @@ class TransactionEditor(Scene):
     def _save_transaction(self):
         """Validate and save the transaction."""
         try:
-            # Validate fields
-            year = int(self.fields["year"])
-            month = int(self.fields["month"])
-            day = int(self.fields["day"])
-            amount = float(self.fields["amount"])
+            # Validate and convert fields
+            if not self.fields["year"]:
+                raise ValueError("Year is required")
+            if not self.fields["month"]:
+                raise ValueError("Month is required")
+            if not self.fields["day"]:
+                raise ValueError("Day is required")
+            if not self.fields["amount"]:
+                raise ValueError("Amount is required")
+
+            try:
+                year = int(self.fields["year"])
+            except ValueError:
+                raise ValueError("Year must be a valid number")
+
+            try:
+                month = int(self.fields["month"])
+            except ValueError:
+                raise ValueError("Month must be a valid number")
+
+            try:
+                day = int(self.fields["day"])
+            except ValueError:
+                raise ValueError("Day must be a valid number")
+
+            try:
+                amount = float(self.fields["amount"])
+            except ValueError:
+                raise ValueError("Amount must be a valid number")
+
             description = self.fields["description"]
             tag_id = self.fields["tag"]
             subtag_id = self.fields.get("subtag", "") or None
@@ -224,6 +250,8 @@ class TransactionEditor(Scene):
                 raise ValueError("Month must be between 1 and 12")
             if day < 1 or day > 31:
                 raise ValueError("Day must be between 1 and 31")
+            if amount <= 0:
+                raise ValueError("Amount must be greater than 0")
 
             # Save transaction
             if self.mode == "add":
@@ -243,9 +271,14 @@ class TransactionEditor(Scene):
             self.change_scene = self.pred_scene
 
         except ValueError as e:
-            # TODO: Show error message to user
-            # For now, just don't save
-            pass
+            # Show error message to user
+            self.change_scene = Dialog(
+                self.screen, self,
+                message=f"Error: {str(e)}",
+                options=["OK"],
+                portion=4,
+                message_color="error"
+            )
 
     def update(self):
         if self.change_scene:

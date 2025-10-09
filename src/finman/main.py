@@ -30,7 +30,7 @@ def main():
             current_scene = scene
             current_scene.on_enter()
         # limit the speed of the app
-        curses.napms(25)
+        curses.napms(10)
         # check for key presses
         input = screen.getch()
 

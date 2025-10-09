@@ -12,10 +12,11 @@ class DIALOG_TYPE(Enum):
 
 
 class Dialog(Scene):
-    def __init__(self, screen, pred_scene, message="", options=None, portion=2):
+    def __init__(self, screen, pred_scene, message="", options=None, portion=2, message_color=None):
         super().__init__(screen, pred_scene)
         self.portion = portion
         self.message = message
+        self.message_color = message_color
         self.options = options if options else []
         self.selected = 0
         self.result = None
@@ -25,6 +26,10 @@ class Dialog(Scene):
         start_y = (num_rows - dialog_height) // 2
         start_x = (num_cols - dialog_width) // 2
         self.dialog_window = curses.newwin(dialog_height, dialog_width, start_y, start_x)
+
+        # Initialize color pair for error messages
+        if self.message_color == "error":
+            curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
 
     def handle_input(self, input):
         if input == curses.KEY_MOUSE:
@@ -77,9 +82,12 @@ class Dialog(Scene):
         # Add a border to the dialog window
         self.dialog_window.box()
 
-        # Display the message
+        # Display the message with color if specified
         if self.message:
-            self.dialog_window.addstr(1, 2, self.message[:dialog_width - 4])
+            if self.message_color == "error":
+                self.dialog_window.addstr(1, 2, self.message[:dialog_width - 4], curses.color_pair(2))
+            else:
+                self.dialog_window.addstr(1, 2, self.message[:dialog_width - 4])
 
         # Build menu with options if provided
         if self.options:

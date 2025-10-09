@@ -3,6 +3,8 @@ from finman.util.menus import build_menu
 from finman.ui.scene import Scene
 from finman.ui.transactions import Transactions
 from finman.ui.budget import Budget
+from finman.ui.overview import Overview
+from finman.ui.help import Help
 
 
 class MainMenu(Scene):
@@ -10,7 +12,7 @@ class MainMenu(Scene):
         super().__init__(screen,None)
         self.entered = False
         self.selected = 0
-        self.options = ["Overview", "Transations", "Budget"]
+        self.options = ["Overview", "Transations", "Budget", "Help"]
         self.menu_window = curses.newwin(1, 1, 3, 0)
         self.title_window = curses.newwin(1, 1, 0, 0)
         self.help_window = curses.newwin(1, 1, 0, 0)
@@ -38,17 +40,25 @@ class MainMenu(Scene):
                         self.selected = clicked_option
                         # On click, trigger selection
                         if bstate & curses.BUTTON1_CLICKED:
-                            if self.selected == 1:
+                            if self.selected == 0:
+                                self.change_scene = Overview(self.screen,self)
+                            elif self.selected == 1:
                                 self.change_scene = Transactions(self.screen,self)
                             elif self.selected == 2:
                                 self.change_scene = Budget(self.screen,self)
+                            elif self.selected == 3:
+                                self.change_scene = Help(self.screen,self)
             except:
                 pass
         elif input == curses.KEY_ENTER or input == 10 or input == 13:
-            if self.selected == 1:
+            if self.selected == 0:
+                self.change_scene = Overview(self.screen,self)
+            elif self.selected == 1:
                 self.change_scene = Transactions(self.screen,self)
             elif self.selected == 2:
                 self.change_scene = Budget(self.screen,self)
+            elif self.selected == 3:
+                self.change_scene = Help(self.screen,self)
         elif input == 27:
             exit()
         elif input == curses.KEY_DOWN:

@@ -1,5 +1,6 @@
 import curses
 from finman.ui.scene import Scene
+from finman.util.dialog import Dialog
 from finman.logic.financial_data import FinancialData
 from datetime import datetime
 
@@ -162,16 +163,37 @@ class BudgetEditor(Scene):
     def _save_item(self):
         """Validate and save the tag or subtag."""
         try:
-            # Validate common fields
-            year = int(self.fields["year"])
-            month = int(self.fields["month"])
+            # Validate and convert common fields
+            if not self.fields["year"]:
+                raise ValueError("Year is required")
+            if not self.fields["month"]:
+                raise ValueError("Month is required")
+            if not self.fields["max_amount"]:
+                raise ValueError("Max amount is required")
+
+            try:
+                year = int(self.fields["year"])
+            except ValueError:
+                raise ValueError("Year must be a valid number")
+
+            try:
+                month = int(self.fields["month"])
+            except ValueError:
+                raise ValueError("Month must be a valid number")
+
+            try:
+                max_amount = float(self.fields["max_amount"])
+            except ValueError:
+                raise ValueError("Max amount must be a valid number")
+
             name = self.fields["name"]
-            max_amount = float(self.fields["max_amount"])
 
             if not name:
                 raise ValueError("Name is required")
             if month < 1 or month > 12:
                 raise ValueError("Month must be between 1 and 12")
+            if max_amount <= 0:
+                raise ValueError("Max amount must be greater than 0")
 
             # Save based on item type
             if self.item_type == "tag":
@@ -212,9 +234,14 @@ class BudgetEditor(Scene):
             self.change_scene = self.pred_scene
 
         except ValueError as e:
-            # TODO: Show error message to user
-            # For now, just don't save
-            pass
+            # Show error message to user
+            self.change_scene = Dialog(
+                self.screen, self,
+                message=f"Error: {str(e)}",
+                options=["OK"],
+                portion=4,
+                message_color="error"
+            )
 
     def update(self):
         if self.change_scene:
