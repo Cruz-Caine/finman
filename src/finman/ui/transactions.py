@@ -300,7 +300,7 @@ class Transactions(Scene):
             # Clear pending delete and dialog reference
             self.pending_delete = None
             self.last_dialog = None
-        pass
+        super().on_enter()
 
     def on_exit(self):
         super().on_exit()

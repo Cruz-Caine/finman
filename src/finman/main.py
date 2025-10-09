@@ -18,19 +18,25 @@ def main():
     #    else:
     #        print(data)
     
-    input = None
+    input = -1
     main_menu = MainMenu(screen,None)
     current_scene = main_menu
-    while True:
+    current_scene.on_enter()
 
+    while True:
         scene = current_scene.full_pass(input)
 
         if scene != None:
             current_scene.on_exit()
             current_scene = scene
             current_scene.on_enter()
-        # limit the speed of the app
-        curses.napms(10)
+            # Force immediate render of new scene
+            input = -1
+            continue
+
+        # limit the speed of the app (8ms = ~120fps for responsiveness)
+        curses.napms(8)
+
         # check for key presses
         input = screen.getch()
 

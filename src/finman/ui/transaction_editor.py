@@ -128,19 +128,19 @@ class TransactionEditor(Scene):
                         field_row += 1
             except:
                 pass
-        # Tab: move to next field
-        elif input == 9:  # Tab
-            self.current_field = (self.current_field + 1) % len(self.field_names)
-            # Skip subtag field if current tag has no subtags
-            if self.field_names[self.current_field] == "subtag" and not self._get_subtag_list():
-                self.current_field = (self.current_field + 1) % len(self.field_names)
-
-        # Shift+Tab: move to previous field
-        elif input == 353:  # Shift+Tab
+        # Up arrow: move to previous field
+        elif input == curses.KEY_UP:
             self.current_field = (self.current_field - 1) % len(self.field_names)
             # Skip subtag field if current tag has no subtags
             if self.field_names[self.current_field] == "subtag" and not self._get_subtag_list():
                 self.current_field = (self.current_field - 1) % len(self.field_names)
+
+        # Down arrow: move to next field
+        elif input == curses.KEY_DOWN:
+            self.current_field = (self.current_field + 1) % len(self.field_names)
+            # Skip subtag field if current tag has no subtags
+            if self.field_names[self.current_field] == "subtag" and not self._get_subtag_list():
+                self.current_field = (self.current_field + 1) % len(self.field_names)
 
         # Enter: save transaction
         elif input == curses.KEY_ENTER or input == 10 or input == 13:
@@ -150,9 +150,9 @@ class TransactionEditor(Scene):
         elif input == 27:
             self.change_scene = self.pred_scene
 
-        # For tag and subtag fields: use up/down to cycle options
+        # For tag and subtag fields: use left/right to cycle options
         elif field_name == "tag":
-            if input == curses.KEY_UP:
+            if input == curses.KEY_LEFT:
                 tag_list = self._get_tag_list()
                 if tag_list:
                     current_tag = self.fields.get("tag", "")
@@ -163,7 +163,7 @@ class TransactionEditor(Scene):
                         idx = 0
                     self.fields["tag"] = tag_list[idx]
                     self.fields["subtag"] = ""  # Reset subtag when tag changes
-            elif input == curses.KEY_DOWN:
+            elif input == curses.KEY_RIGHT:
                 tag_list = self._get_tag_list()
                 if tag_list:
                     current_tag = self.fields.get("tag", "")
@@ -176,7 +176,7 @@ class TransactionEditor(Scene):
                     self.fields["subtag"] = ""  # Reset subtag when tag changes
 
         elif field_name == "subtag":
-            if input == curses.KEY_UP:
+            if input == curses.KEY_LEFT:
                 subtag_list = self._get_subtag_list()
                 if subtag_list:
                     current_subtag = self.fields.get("subtag", "")
@@ -186,7 +186,7 @@ class TransactionEditor(Scene):
                     else:
                         idx = 0
                     self.fields["subtag"] = subtag_list[idx]
-            elif input == curses.KEY_DOWN:
+            elif input == curses.KEY_RIGHT:
                 subtag_list = self._get_subtag_list()
                 if subtag_list:
                     current_subtag = self.fields.get("subtag", "")
@@ -316,7 +316,7 @@ class TransactionEditor(Scene):
                 if tag_id and tag_id in self.available_tags:
                     value = f"{tag_id} ({self.available_tags[tag_id]['name']})"
                 else:
-                    value = "(select with up/down)" if not tag_id else tag_id
+                    value = "(select with ←/→)" if not tag_id else tag_id
             elif field_name == "subtag":
                 subtag_id = self.fields.get("subtag", "")
                 current_tag = self.fields.get("tag", "")
@@ -328,7 +328,7 @@ class TransactionEditor(Scene):
                     else:
                         value = subtag_id
                 else:
-                    value = "(optional, use up/down)"
+                    value = "(optional, use ←/→)"
             else:
                 value = self.fields.get(field_name, "")
 
@@ -343,7 +343,7 @@ class TransactionEditor(Scene):
             row += 1
 
         # Instructions
-        instructions = "Tab/Shift+Tab: Navigate | Enter: Save | Esc: Cancel"
+        instructions = "↑/↓: Navigate | ←/→: Select tag/subtag | Enter: Save | Esc: Cancel"
         if row < popup_height - 2:
             self.popup_window.addstr(popup_height - 2, 2, instructions[:popup_width - 4])
 
@@ -355,6 +355,7 @@ class TransactionEditor(Scene):
         self.popup_window.refresh()
 
     def on_enter(self):
+        super().on_enter()
         pass
 
     def on_exit(self):

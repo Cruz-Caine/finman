@@ -104,6 +104,7 @@ class MainMenu(Scene):
         pass
 
     def on_enter(self):
+        super().on_enter()
         pass
 
     def on_exit(self):

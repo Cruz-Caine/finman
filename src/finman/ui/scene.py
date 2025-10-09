@@ -20,15 +20,20 @@ class Scene():
     def full_pass(self,input):
         # Only process input and mark for render if there's actual input
         if input != -1:  # -1 means no input (nodelay mode)
-            self.handle_input(input)
-            self.needs_render = True
+            # Handle terminal resize
+            if input == curses.KEY_RESIZE:
+                self.needs_render = True
+            else:
+                self.handle_input(input)
+                self.needs_render = True
 
-        scene = self.update()
-
-        # Only render if needed
-        if self.needs_render:
-            self.render()
-            self.needs_render = False
+        # Only update and render when needed
+        scene = None
+        if self.needs_render or self.change_scene is not None:
+            scene = self.update()
+            if self.needs_render:
+                self.render()
+                self.needs_render = False
 
         return scene
 

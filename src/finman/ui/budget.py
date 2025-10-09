@@ -422,5 +422,7 @@ class Budget(Scene):
             self.pending_delete = None
             self.last_dialog = None
 
+        super().on_enter()
+
     def on_exit(self):
         super().on_exit()

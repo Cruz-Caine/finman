@@ -113,13 +113,13 @@ class BudgetEditor(Scene):
                         self.current_field = rel_y
             except:
                 pass
-        # Tab: move to next field
-        elif input == 9:  # Tab
-            self.current_field = (self.current_field + 1) % len(self.field_names)
-
-        # Shift+Tab: move to previous field
-        elif input == 353:  # Shift+Tab
+        # Up arrow: move to previous field
+        elif input == curses.KEY_UP:
             self.current_field = (self.current_field - 1) % len(self.field_names)
+
+        # Down arrow: move to next field
+        elif input == curses.KEY_DOWN:
+            self.current_field = (self.current_field + 1) % len(self.field_names)
 
         # Enter: save item
         elif input == curses.KEY_ENTER or input == 10 or input == 13:
@@ -129,9 +129,9 @@ class BudgetEditor(Scene):
         elif input == 27:
             self.change_scene = self.pred_scene
 
-        # For parent_tag field: use up/down to cycle options
+        # For parent_tag field: use left/right to cycle options
         elif field_name == "parent_tag":
-            if input == curses.KEY_UP:
+            if input == curses.KEY_LEFT:
                 tag_list = self._get_parent_tag_list()
                 if tag_list:
                     current_tag = self.fields.get("parent_tag", "")
@@ -141,7 +141,7 @@ class BudgetEditor(Scene):
                     else:
                         idx = 0
                     self.fields["parent_tag"] = tag_list[idx]
-            elif input == curses.KEY_DOWN:
+            elif input == curses.KEY_RIGHT:
                 tag_list = self._get_parent_tag_list()
                 if tag_list:
                     current_tag = self.fields.get("parent_tag", "")
@@ -286,7 +286,7 @@ class BudgetEditor(Scene):
                 if tag_id and tag_id in self.available_parent_tags:
                     value = f"{tag_id} ({self.available_parent_tags[tag_id]})"
                 else:
-                    value = "(select with up/down)" if not tag_id else tag_id
+                    value = "(select with ←/→)" if not tag_id else tag_id
             else:
                 value = self.fields.get(field_name, "")
 
@@ -301,7 +301,7 @@ class BudgetEditor(Scene):
             row += 1
 
         # Instructions
-        instructions = "Tab/Shift+Tab: Navigate | Enter: Save | Esc: Cancel"
+        instructions = "↑/↓: Navigate | ←/→: Select parent tag | Enter: Save | Esc: Cancel"
         if row < popup_height - 2:
             self.popup_window.addstr(popup_height - 2, 2, instructions[:popup_width - 4])
 
@@ -313,6 +313,7 @@ class BudgetEditor(Scene):
         self.popup_window.refresh()
 
     def on_enter(self):
+        super().on_enter()
         pass
 
     def on_exit(self):
